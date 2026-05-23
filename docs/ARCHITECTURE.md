@@ -1,6 +1,6 @@
 # Architecture
 
-The canonical spec is [`../CONTEXT.md`](../CONTEXT.md). This doc maps that spec
+The canonical spec is [`./CONTEXT.md`](./CONTEXT.md). This doc maps that spec
 onto the actual files so you can find where each idea lives.
 
 ## The one diagram to keep in your head

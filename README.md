@@ -6,7 +6,8 @@ You log in, itto spawns next to you, joins your voice call, and you just play
 together. It talks, it helps, it learns your playstyle over sessions. Not a
 coach. Not a tutorial bot. A duo partner.
 
-Full project spec: **[CONTEXT.md](./CONTEXT.md)**. Architecture map:
+Full project spec: **[docs/CONTEXT.md](./docs/CONTEXT.md)**. Build order /
+where to start: **[docs/ROADMAP.md](./docs/ROADMAP.md)**. Architecture map:
 **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
 ## How it's built
@@ -29,15 +30,14 @@ of "am I standing in lava."
 itto/
 ├── apps/
 │   ├── mc-bot/        # Mineflayer bot: fast-loop, slow-loop, skills, state, bot/
-│   └── web/           # landing page (Next.js — framework still TBD vs Astro)
+│   └── web/           # landing page (owned separately — not part of the bot build)
 ├── packages/
-│   ├── mcp-server/    # MCP server Hermes connects to (tools/ + resources/)
+│   ├── mcp-server/    # MCP server (only needed if an EXTERNAL agent drives the bot)
 │   ├── shared/        # types, zod schemas, prompts, BotControl interface
-│   └── discord-bridge/# OPTIONAL DIY voice — only if Hermes' plugin falls short
+│   └── discord-bridge/# OPTIONAL DIY voice — for later
 ├── infra/             # docker-compose (local MC server), deploy/
-├── docs/              # ARCHITECTURE.md, HERMES_SETUP.md
-├── scripts/           # dev.sh, seed-skills/ (Hermes markdown templates)
-└── CONTEXT.md         # the spec
+├── docs/              # CONTEXT.md (spec), ROADMAP.md, ARCHITECTURE.md, HERMES_SETUP.md
+└── scripts/           # dev.sh, seed-skills/ (Hermes markdown templates)
 ```
 
 ## Quick start
