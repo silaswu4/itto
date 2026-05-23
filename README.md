@@ -7,7 +7,8 @@ together. It talks, it helps, it learns your playstyle over sessions. Not a
 coach. Not a tutorial bot. A duo partner.
 
 Full project spec: **[docs/CONTEXT.md](./docs/CONTEXT.md)**. Build order /
-where to start: **[docs/ROADMAP.md](./docs/ROADMAP.md)**. Architecture map:
+where to start: **[docs/ROADMAP.md](./docs/ROADMAP.md)**. Who runs what:
+**[docs/RUNBOOK.md](./docs/RUNBOOK.md)**. Architecture map:
 **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)**.
 
 ## How it's built
