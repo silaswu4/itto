@@ -31,7 +31,13 @@ export class Bridge {
   }
 
   async start(guild: Guild): Promise<void> {
-    await this.mc.connect();
+    // Non-fatal: voice should work even if the MC bot isn't up yet. Tools +
+    // game context kick in once itto-mc is reachable (the poll reconnects).
+    try {
+      await this.mc.connect();
+    } catch {
+      log.warn("itto-mc not reachable yet (is `bun run bot` up?) — voice works; MC tools/context start once it is");
+    }
 
     this.eleven = new ElevenConversation(this.cfg.elevenlabs.apiKey, this.cfg.elevenlabs.agentId, {
       onAudio: (pcmMono, rate) => this.voice?.play(elevenToDiscord(pcmMono, rate)),
@@ -90,6 +96,7 @@ export class Bridge {
   private startContextPoll(): void {
     this.pollTimer = setInterval(async () => {
       try {
+        if (!this.mc.connected) await this.mc.connect(); // best-effort reconnect once the bot's up
         const s = await this.mc.getState();
         const ctx = this.deriveContext(s);
         this.prev = s;

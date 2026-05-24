@@ -15,7 +15,12 @@ export class McClient {
 
   constructor(private readonly url: string) {}
 
+  get connected(): boolean {
+    return this.client !== null;
+  }
+
   async connect(): Promise<void> {
+    if (this.client) return; // idempotent — safe to call from reconnect loop
     const client = new Client({ name: "itto-voice", version: "0.0.0" });
     const transport = new StreamableHTTPClientTransport(new URL(this.url));
     await client.connect(transport);
