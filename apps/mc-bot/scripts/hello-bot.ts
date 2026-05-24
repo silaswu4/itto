@@ -2,21 +2,14 @@
  * The absolute minimum mineflayer bot — "hello world" for the body.
  * No framework, no MCP, no loops. Just: connect, log what happens, follow.
  *
- * Lives inside the mc-bot workspace so it resolves mineflayer.
- * Run it:
- *   bun run --filter @itto/mc-bot hello        # from repo root
- *   bun run hello                              # from apps/mc-bot
+ * Run from the REPO ROOT (so Bun loads the root .env):
+ *   bun run hello
  *
- * Set env first (or put them in .env and the real bot reads them):
- *
- * ── Local offline server (easiest for solo dev, no account needed) ──
- *   MC_AUTH=offline MC_OWNER_USERNAME=<you> bun run --filter @itto/mc-bot hello
- *
- * ── Minehut / any ONLINE-mode server (needs a real MC account) ──
- *   MC_SERVER_HOST=<name>.minehut.gg MC_AUTH=microsoft \
- *   MC_OWNER_USERNAME=<you> bun run --filter @itto/mc-bot hello
- *   (first run prints a microsoft.com/link code to sign the bot's account in;
- *    the server must be AWAKE — Minehut free servers sleep when idle.)
+ * It reads config from .env. For Minehut that's MC_AUTH=microsoft +
+ * MC_SERVER_HOST=<name>.minehut.gg + MC_VERSION=1.20.6 + MC_OWNER_USERNAME=<you>.
+ * First run prints a microsoft.com/link code to sign the bot's account in
+ * (use the BOT's account, not yours). The server must be AWAKE — Minehut
+ * free servers sleep when idle, so join it yourself first to wake it.
  */
 import mineflayer from "mineflayer";
 
@@ -27,7 +20,7 @@ const bot = mineflayer.createBot({
   port: Number(process.env.MC_SERVER_PORT ?? 25565),
   username: process.env.MC_BOT_USERNAME ?? "itto",
   auth,
-  version: process.env.MC_VERSION ?? "1.20.4",
+  version: process.env.MC_VERSION ?? "1.20.6",
   // microsoft auth: print the device-code link instead of opening a browser
   onMsaCode: (data) => console.log(`🔑 sign in: ${data.verification_uri} code ${data.user_code}`),
 });

@@ -41,7 +41,7 @@ export function loadConfig(): Config {
     mc: {
       host: process.env.MC_SERVER_HOST ?? "localhost",
       port: num("MC_SERVER_PORT", 25565),
-      version: process.env.MC_VERSION ?? "1.20.4",
+      version: process.env.MC_VERSION ?? "1.20.6",
       username: process.env.MC_BOT_USERNAME ?? "itto",
       auth: (process.env.MC_AUTH as "offline" | "microsoft") ?? "offline",
       ownerUsername: req("MC_OWNER_USERNAME"),

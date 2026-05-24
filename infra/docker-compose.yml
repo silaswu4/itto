@@ -14,7 +14,7 @@ services:
     environment:
       EULA: "TRUE"
       TYPE: "PAPER"
-      VERSION: "1.20.4"
+      VERSION: "1.20.6"
       ONLINE_MODE: "FALSE" # offline mode so the bot can log in without a real account in dev
       MEMORY: "2G"
       # give the bot op so teleport-fallback works in dev
