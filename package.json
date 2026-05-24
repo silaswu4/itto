@@ -14,6 +14,8 @@
     "lint": "bun run --filter '*' lint",
     "bot": "bun --watch apps/mc-bot/src/index.ts",
     "hello": "bun apps/mc-bot/scripts/hello-bot.ts",
+    "voice": "bun --watch packages/discord-bridge/src/index.ts",
+    "voice:agent": "bun packages/discord-bridge/scripts/create-agent.ts",
     "web": "bun run --filter @itto/web dev",
     "mc:up": "docker compose -f infra/docker-compose.yml up -d mc",
     "mc:down": "docker compose -f infra/docker-compose.yml down",
