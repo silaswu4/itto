@@ -134,8 +134,7 @@ Hermes will add to this list as we play. Skills are stored as MD files in Hermes
 ```
 your-project/
 ├── README.md
-├── package.json              # pnpm workspaces
-├── pnpm-workspace.yaml
+├── package.json              # bun workspaces
 ├── .env.example
 │
 ├── apps/
@@ -216,14 +215,14 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 
 # 2. Clone this repo
 git clone <repo> && cd <repo>
-pnpm install
+bun install
 
 # 3. Configure
 cp .env.example .env
 # fill in: MC_SERVER_HOST, DISCORD_TOKEN, ANTHROPIC_API_KEY, etc.
 
 # 4. Spin up local MC + bot + MCP server
-pnpm dev
+bun run bot
 
 # 5. Point Hermes at our MCP server
 hermes mcp add minecraft-buddy http://localhost:3001

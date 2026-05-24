@@ -16,7 +16,7 @@ curl -fsSL https://raw.githubusercontent.com/NousResearch/hermes-agent/main/scri
 
 ## 2. Point it at our MCP server
 
-Start itto first (`pnpm bot`), which serves MCP at `http://localhost:3001/mcp`,
+Start itto first (`bun run bot`), which serves MCP at `http://localhost:3001/mcp`,
 then register it:
 
 ```bash

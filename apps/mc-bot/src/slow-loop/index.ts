@@ -31,7 +31,7 @@ export const consoleNudgeSink: NudgeSink = {
  * to Hermes via the NudgeSink.
  */
 export class SlowLoop {
-  private timer: NodeJS.Timeout | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
   private prev: GameState | null = null;
   private readonly vibe = new VibeCheck();
   private lastNudgeAt = 0;

@@ -23,10 +23,10 @@ testing there's zero networking to deal with.
 You own the body (`apps/mc-bot`). You test it standalone (no Hermes) and push.
 
 ```bash
-pnpm install
+bun install
 cp .env.example .env        # set MC_OWNER_USERNAME to YOUR mc name
-pnpm mc:up                  # local MC server on :25565
-pnpm bot                    # bot + MCP server on :3001
+bun run mc:up               # local MC server on :25565
+bun run bot                 # bot + MCP server on :3001
 ```
 
 - Log into `localhost:25565` with your MC client, confirm the bot follows you.
@@ -39,10 +39,10 @@ Pulls your code and runs the full integrated stack on his machine.
 
 ```bash
 git pull                    # body + MCP + these docs (NOT Hermes)
-pnpm install
+bun install
 cp .env.example .env        # set MC_OWNER_USERNAME to HIS mc name
-pnpm mc:up                  # MC server, localhost:25565
-pnpm bot                    # bot + MCP, localhost:3001
+bun run mc:up               # MC server, localhost:25565
+bun run bot                 # bot + MCP, localhost:3001
 
 # Hermes — installed separately, see docs/HERMES_SETUP.md
 hermes mcp add itto http://localhost:3001/mcp
@@ -54,9 +54,9 @@ the call.
 
 ## Demo-day checklist (friend)
 
-1. `git pull && pnpm install` — get the latest body
-2. `pnpm mc:up` — wait until `:25565` accepts connections
-3. `pnpm bot` — confirm log says MCP is listening on `:3001`
+1. `git pull && bun install` — get the latest body
+2. `bun run mc:up` — wait until `:25565` accepts connections
+3. `bun run bot` — confirm log says MCP is listening on `:3001`
 4. `hermes mcp add itto http://localhost:3001/mcp` — confirm Hermes sees the tools
 5. Join the Discord voice channel, enable the Hermes Discord platform
 6. Log into MC, verify the bot spawns + follows + responds

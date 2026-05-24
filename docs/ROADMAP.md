@@ -41,7 +41,7 @@ Rules:
 
 ### M0 — It moves (BODY, do this first, ~day 1)
 Goal: bot joins your world and follows you. No LLM, no Hermes, no MCP yet.
-- `pnpm install`, fill `.env` (at least `MC_OWNER_USERNAME`), `pnpm mc:up`, `pnpm bot`
+- `bun install`, fill `.env` (at least `MC_OWNER_USERNAME`), `bun run mc:up`, `bun run bot`
 - Debug the follow state machine (`fast-loop/follow.ts`) in a real world: tune
   hysteresis, prediction, teleport-fallback so it doesn't jitter or get stuck
 - Confirm safety reflexes (`fast-loop/safety.ts`): lava bail, creeper retreat, auto-eat

@@ -1,27 +1,20 @@
 # Container image for the mc-bot + MCP server (optional prod path).
 # Build from the repo root: docker build -f infra/deploy/bot.Dockerfile .
 
-FROM node:20-slim AS base
-ENV PNPM_HOME="/pnpm" PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+FROM oven/bun:1 AS base
 WORKDIR /app
 
 # install deps (workspace-aware)
 FROM base AS deps
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
+COPY package.json bun.lock* ./
 COPY packages/shared/package.json packages/shared/
 COPY packages/mcp-server/package.json packages/mcp-server/
 COPY apps/mc-bot/package.json apps/mc-bot/
-RUN pnpm install --frozen-lockfile || pnpm install
+RUN bun install --frozen-lockfile || bun install
 
-# build
-FROM deps AS build
-COPY . .
-RUN pnpm --filter @itto/mc-bot... build
-
-# runtime
-FROM base AS runtime
+# runtime — Bun runs TypeScript directly, no build step needed
+FROM deps AS runtime
 ENV NODE_ENV=production
-COPY --from=build /app /app
+COPY . .
 EXPOSE 3001
-CMD ["node", "apps/mc-bot/dist/index.js"]
+CMD ["bun", "apps/mc-bot/src/index.ts"]

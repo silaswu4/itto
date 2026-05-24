@@ -25,4 +25,4 @@ for _ in $(seq 1 60); do
 done
 
 echo "▸ starting itto bot + MCP server…"
-pnpm bot
+bun run bot

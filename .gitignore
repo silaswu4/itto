@@ -1,6 +1,6 @@
 # deps
 node_modules/
-.pnpm-store/
+# NOTE: bun.lock IS committed (it's the lockfile). Don't ignore it.
 
 # builds
 dist/

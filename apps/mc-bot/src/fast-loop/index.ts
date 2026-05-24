@@ -16,7 +16,7 @@ const log = logger("fast-loop");
 export class FastLoop {
   readonly follow: FollowController;
   private readonly safety: SafetyReflexes;
-  private timer: NodeJS.Timeout | null = null;
+  private timer: ReturnType<typeof setInterval> | null = null;
 
   constructor(
     private readonly bot: Bot,

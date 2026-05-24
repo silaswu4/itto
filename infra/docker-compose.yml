@@ -2,7 +2,7 @@
 #   docker compose -f infra/docker-compose.yml up -d mc
 #
 # Spins up a Paper Minecraft server for the bot to join. The bot itself runs on
-# the host via `pnpm bot` (easier to iterate than rebuilding an image), but a
+# the host via `bun run bot` (easier to iterate than rebuilding an image), but a
 # bot service is included (commented) for a full containerized run later.
 
 services:
@@ -25,7 +25,7 @@ services:
       - mc-data:/data
     restart: unless-stopped
 
-  # ── full containerized bot (optional; default is host `pnpm bot`) ──
+  # ── full containerized bot (optional; default is host `bun run bot`) ──
   # bot:
   #   build:
   #     context: ..

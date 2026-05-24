@@ -43,13 +43,14 @@ itto/
 
 ## Quick start
 
+Runs on [Bun](https://bun.sh) (no Node/tsx — Bun executes the TypeScript directly).
+
 ```bash
-# 0. tools
-nvm use            # node 20
-corepack enable    # pnpm
+# 0. tooling
+curl -fsSL https://bun.sh/install | bash   # if you don't have bun
 
 # 1. install
-pnpm install
+bun install
 
 # 2. config
 cp .env.example .env
@@ -58,8 +59,8 @@ cp .env.example .env
 # 3. local minecraft + the bot (one command)
 ./scripts/dev.sh
 #   or manually:
-#   pnpm mc:up        # docker paper server on :25565
-#   pnpm bot          # bot + MCP server on :3001
+#   bun run mc:up     # docker paper server on :25565
+#   bun run bot       # bot + MCP server on :3001
 
 # 4. wire up the brain (separate process — see docs/HERMES_SETUP.md)
 hermes mcp add itto http://localhost:3001/mcp
