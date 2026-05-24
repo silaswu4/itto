@@ -1,23 +1,23 @@
 /**
  * Provision (or update) itto's ElevenLabs Conversational AI agent via the API.
- * The agent's persona + tools are defined HERE so they're version-controlled,
- * not buried in a dashboard.
+ * Persona + tools live HERE so they're version-controlled, not in a dashboard.
  *
  *   bun run voice:agent            # from repo root (loads .env)
  *
- * Reads ELEVENLABS_API_KEY (+ optional ELEVENLABS_VOICE_ID / ELEVENLABS_LLM).
- * Prints the agent_id to paste into .env as ELEVENLABS_AGENT_ID.
- *
- * The agent talks via ElevenLabs (STT+LLM+TTS+turn-taking). To act in the
- * Minecraft world it calls CLIENT tools, which the voice bridge proxies to the
- * itto-mc MCP server. So the agent never touches the network directly.
+ * ElevenLabs client tools are standalone objects referenced by tool_ids, so we
+ * upsert the tools first (by name, idempotent), then attach them to the agent.
+ * Reads ELEVENLABS_API_KEY (+ optional ELEVENLABS_AGENT_ID/VOICE_ID/LLM).
  */
 
 const API_KEY = process.env.ELEVENLABS_API_KEY;
 if (!API_KEY) throw new Error("set ELEVENLABS_API_KEY (in .env) first");
 
-const VOICE_ID = process.env.ELEVENLABS_VOICE_ID ?? "pNInz6obpgDQGcFmaJgB"; // Adam — swap for itto's voice
-const LLM = process.env.ELEVENLABS_LLM ?? "gemini-2.5-flash"; // low-latency; set a claude model if you prefer
+const VOICE_ID = process.env.ELEVENLABS_VOICE_ID || "pNInz6obpgDQGcFmaJgB";
+const LLM = process.env.ELEVENLABS_LLM || "claude-haiku-4-5";
+const AGENT_ID = process.env.ELEVENLABS_AGENT_ID;
+
+const EL = "https://api.elevenlabs.io/v1/convai";
+const H = { "xi-api-key": API_KEY, "content-type": "application/json" };
 
 const SYSTEM_PROMPT = `You are itto — a chill homie hanging in a Discord voice call with your friends while you all play Minecraft together. You also have a body in the Minecraft world (a bot) that you control with tools.
 
@@ -38,76 +38,86 @@ Your tools:
 
 Keep it light, keep it real, keep it short.`;
 
-const tools = [
+const toolSpecs = [
   {
     type: "client",
     name: "minecraft_say",
-    description: "Type a short message into Minecraft text chat (for players in-game). Use for in-world banter, distinct from talking out loud in the voice call.",
+    description: "Type a short message into Minecraft game chat (for players in-game). Distinct from talking out loud in the voice call.",
+    expects_response: false,
     parameters: {
       type: "object",
-      properties: { message: { type: "string", description: "The line to type in MC chat (short, casual, lowercase)." } },
       required: ["message"],
+      properties: { message: { type: "string", description: "the line to type (short, casual, lowercase)" } },
     },
-    expects_response: false,
   },
   {
     type: "client",
     name: "minecraft_run_skill",
-    description: "Run an itto skill in the Minecraft world. Use when asked to come/follow, help mine, fight mobs, scout ahead, build, fetch an item, or report inventory.",
+    description: "Run an itto skill in the Minecraft world. Use when asked to come/follow, mine, fight mobs, scout, build, fetch an item, or report inventory.",
+    expects_response: true,
     parameters: {
       type: "object",
+      required: ["skill"],
       properties: {
         skill: {
           type: "string",
-          description: "One of: follow_player, assist_mining, combat_assist, fetch_item, scout_ahead, build_helper, inventory_report.",
+          description: "one of: follow_player, assist_mining, combat_assist, fetch_item, scout_ahead, build_helper, inventory_report",
         },
-        args: { type: "string", description: "Optional JSON string of skill args, e.g. {\"name\":\"diamond\"} for fetch_item. Omit if none." },
+        args: { type: "string", description: "optional JSON string of skill args, e.g. {\"name\":\"diamond\"} for fetch_item" },
       },
-      required: ["skill"],
     },
-    expects_response: true,
   },
   {
     type: "client",
     name: "minecraft_get_state",
-    description: "Get the current Minecraft world snapshot (your position/health, the player's distance, nearby mobs, inventory, recent chat). Use when you need specifics you weren't told.",
-    parameters: { type: "object", properties: {} },
+    description: "Get the current Minecraft world snapshot (your position/health, the player's distance, nearby mobs, inventory, recent chat).",
     expects_response: true,
+    parameters: { type: "object", properties: {} },
   },
 ];
 
-const body = {
+async function el(method: string, path: string, body?: unknown) {
+  const res = await fetch(`${EL}${path}`, { method, headers: H, body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}: ${await res.text()}`);
+  return res.json();
+}
+
+// ── 1. upsert the client tools (idempotent by name) ──
+const existing = (await el("GET", "/tools").catch(() => ({ tools: [] }))) as { tools?: Array<{ id: string; tool_config?: { name?: string } }> };
+const byName = new Map((existing.tools ?? []).map((t) => [t.tool_config?.name, t.id]));
+
+const toolIds: string[] = [];
+for (const spec of toolSpecs) {
+  const id = byName.get(spec.name);
+  if (id) {
+    await el("PATCH", `/tools/${id}`, { tool_config: spec }).catch((e) => console.warn(`(couldn't update ${spec.name}, reusing): ${e}`));
+    toolIds.push(id);
+    console.log(`↻ tool ${spec.name} (${id})`);
+  } else {
+    const created = (await el("POST", "/tools", { tool_config: spec })) as { id: string };
+    toolIds.push(created.id);
+    console.log(`+ tool ${spec.name} (${created.id})`);
+  }
+}
+
+// ── 2. upsert the agent, attaching the tools by id ──
+const agentBody = {
   name: "itto",
   conversation_config: {
     agent: {
       first_message: "yo i'm in. let's get it",
       language: "en",
-      prompt: { prompt: SYSTEM_PROMPT, llm: LLM, tools },
+      prompt: { prompt: SYSTEM_PROMPT, llm: LLM, tool_ids: toolIds },
     },
-    tts: { voice_id: VOICE_ID, model_id: "eleven_flash_v2_5" },
+    tts: { voice_id: VOICE_ID, model_id: "eleven_flash_v2" },
   },
 };
 
-const existing = process.env.ELEVENLABS_AGENT_ID;
-const url = existing
-  ? `https://api.elevenlabs.io/v1/convai/agents/${existing}`
-  : "https://api.elevenlabs.io/v1/convai/agents/create";
-const method = existing ? "PATCH" : "POST";
-
-const res = await fetch(url, {
-  method,
-  headers: { "xi-api-key": API_KEY, "content-type": "application/json" },
-  body: JSON.stringify(body),
-});
-
-if (!res.ok) {
-  console.error(`❌ ${method} ${url} -> ${res.status}`);
-  console.error(await res.text());
-  process.exit(1);
-}
-
-const data = (await res.json()) as { agent_id?: string };
-const agentId = data.agent_id ?? existing;
-console.log(existing ? "✅ updated itto agent" : "✅ created itto agent");
-console.log(`\nagent_id: ${agentId}`);
-if (!existing) console.log(`\n→ add this to your .env:\n   ELEVENLABS_AGENT_ID=${agentId}\n`);
+const agent = (await el(AGENT_ID ? "PATCH" : "POST", AGENT_ID ? `/agents/${AGENT_ID}` : "/agents/create", agentBody)) as {
+  agent_id?: string;
+};
+const agentId = agent.agent_id ?? AGENT_ID;
+console.log(AGENT_ID ? "\n✅ updated itto agent" : "\n✅ created itto agent");
+console.log(`agent_id: ${agentId}`);
+console.log(`tools attached: ${toolSpecs.map((t) => t.name).join(", ")}`);
+if (!AGENT_ID) console.log(`\n→ add to .env:\n   ELEVENLABS_AGENT_ID=${agentId}\n`);
