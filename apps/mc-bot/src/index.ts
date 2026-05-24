@@ -3,7 +3,8 @@ import { loadConfig } from "./config.js";
 import { createBot } from "./bot/create-bot.js";
 import { BotController } from "./bot/controller.js";
 import { FastLoop } from "./fast-loop/index.js";
-import { SlowLoop } from "./slow-loop/index.js";
+import { SlowLoop, consoleNudgeSink } from "./slow-loop/index.js";
+import { createAgentBrainSink } from "./slow-loop/agent-sink.js";
 import { registerSkillTools } from "./skills/index.js";
 import type { SkillContext } from "./skills/types.js";
 import { pushChat } from "./state/extract.js";
@@ -46,8 +47,14 @@ async function main() {
     slow.poke();
   });
 
-  // 4 — slow loop (default sink logs; swap for Hermes bridge once wired)
-  const slow = new SlowLoop(controller, cfg);
+  // 4 — slow loop. The sink routes "nudges" (something worth reacting to) to
+  // the brain: an external agent when configured, else just log.
+  const sink =
+    cfg.brain.enabled && cfg.brain.cmd.length > 0
+      ? createAgentBrainSink({ cmd: cfg.brain.cmd, dir: cfg.brain.dir, cooldownMs: cfg.brain.cooldownMs })
+      : consoleNudgeSink;
+  if (cfg.brain.enabled) log.info("brain: external agent");
+  const slow = new SlowLoop(controller, cfg, sink);
   slow.start();
 
   // 5 — MCP server: primitive tools + resources from the package, skill tools from the app

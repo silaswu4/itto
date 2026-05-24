@@ -33,6 +33,15 @@ export interface Config {
     followTargetRange: number;
     teleportFallbackDistance: number;
   };
+  brain: {
+    /** When true, route slow-loop nudges to an external agent instead of logging. */
+    enabled: boolean;
+    /** argv prefix to invoke the agent; the prompt is appended as the final arg. */
+    cmd: string[];
+    /** working directory for the agent spawn (optional). */
+    dir?: string;
+    cooldownMs: number;
+  };
   logLevel: string;
 }
 
@@ -55,6 +64,12 @@ export function loadConfig(): Config {
       slowLoopIntervalMs: num("SLOW_LOOP_INTERVAL_MS", 4000),
       followTargetRange: num("FOLLOW_TARGET_RANGE", 3),
       teleportFallbackDistance: num("TELEPORT_FALLBACK_DISTANCE", 30),
+    },
+    brain: {
+      enabled: process.env.BRAIN_ENABLED === "true",
+      cmd: (process.env.BRAIN_CMD ?? "").split(" ").filter(Boolean),
+      dir: process.env.BRAIN_DIR || undefined,
+      cooldownMs: num("BRAIN_COOLDOWN_MS", 10000),
     },
     logLevel: process.env.LOG_LEVEL ?? "info",
   };
