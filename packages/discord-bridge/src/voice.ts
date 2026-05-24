@@ -37,12 +37,27 @@ export class VoiceHub {
       selfDeaf: false, // must be able to hear people
       selfMute: false,
     });
-    await entersState(connection, VoiceConnectionStatus.Ready, 20_000);
-    connection.subscribe(this.player);
     this.connection = connection;
+
+    // Diagnostics: log every state transition so we can see where it gets stuck.
+    connection.on("stateChange", (o, n) => log.info(`voice: ${o.status} -> ${n.status}`));
+    connection.on("error", (e) => log.error("voice connection error:", (e as Error).message));
+
+    try {
+      await entersState(connection, VoiceConnectionStatus.Ready, 30_000);
+    } catch (e) {
+      log.error(`voice never reached Ready (stuck at "${connection.state.status}") — ${(e as Error).message}`);
+      log.error(
+        "likely one of: bot lacks Connect/Speak in THAT channel, wrong channel id, or @discordjs/voice UDP/encryption under Bun",
+      );
+      connection.destroy();
+      throw e;
+    }
+
+    connection.subscribe(this.player);
     this.startPlayback();
     this.listen(connection);
-    log.info(`joined voice channel ${channelId}`);
+    log.info(`✅ joined voice channel ${channelId}`);
   }
 
   /** Play agent audio (48kHz stereo PCM) into the VC. */

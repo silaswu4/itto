@@ -12,9 +12,12 @@
     "build": "bun run --filter '*' build",
     "typecheck": "bun run --filter '*' typecheck",
     "lint": "bun run --filter '*' lint",
+    "test": "bun test",
     "bot": "bun --watch apps/mc-bot/src/index.ts",
+    "bot:dev": "MC_AUTH=offline MC_SERVER_HOST=localhost MC_SERVER_PORT=25565 MC_BOT_USERNAME=itto MC_OWNER_USERNAME=dev BRAIN_ENABLED=false bun --watch apps/mc-bot/src/index.ts",
+    "drive": "bun scripts/drive.ts",
     "hello": "bun apps/mc-bot/scripts/hello-bot.ts",
-    "voice": "bun --watch packages/discord-bridge/src/index.ts",
+    "voice": "node --env-file=.env --import tsx packages/discord-bridge/src/index.ts",
     "voice:agent": "bun packages/discord-bridge/scripts/create-agent.ts",
     "web": "bun run --filter @itto/web dev",
     "mc:up": "docker compose -f infra/docker-compose.yml up -d mc",
@@ -23,6 +26,7 @@
   },
   "devDependencies": {
     "@types/bun": "^1.1.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.4.0"
   }
 }
